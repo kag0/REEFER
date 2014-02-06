@@ -14,10 +14,10 @@ import javax.swing.JPasswordField;
 import javax.swing.JButton;
 import javax.swing.SwingWorker;
 
-import tools.Hash;
-import tools.Misc;
-import tools.SHE;
-import tools.SHE.EncryptionResult;
+import blackdoor.util.Hash;
+import blackdoor.util.Misc;
+import blackdoor.util.SHE;
+import blackdoor.util.SHE.EncryptionResult;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
