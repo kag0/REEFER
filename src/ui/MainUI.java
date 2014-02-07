@@ -1,5 +1,6 @@
 package ui;
 //REEFER Emboldened Encryption For Every Rager
+import java.awt.Dimension;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -240,8 +241,9 @@ public class MainUI {
 					if((block+1)*32 >= (cipherFile.length()-IV.length-1))
 						debug = cipher.doFinal(Arrays.copyOf(buffer, k));
 					else debug = cipher.update(Arrays.copyOf(buffer, k));
-
-					fos.write(debug);
+					
+					outStream.write(debug);
+					outStream.flush();
 					if(percent != (percent = (int) (((float) block++)/(cipherFile.length()/IV.length)*100)) && percent % 2 == 0){
 						process(percent);
 						//System.out.println(percent);
@@ -303,9 +305,11 @@ public class MainUI {
 		frmReefer = new JFrame();
 		frmReefer.setTitle("REEFER Emboldened Encryption For Every Rager");
 		frmReefer.setBounds(100, 100, 450, 176);
+		frmReefer.setMinimumSize(new Dimension(450,176));
+		
 		frmReefer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmReefer.getContentPane().setLayout(new MigLayout("", "[][grow]", "[][][][][][]"));
-		
+		//frmReefer.setPreferredSize(new Dimension(500, 177));
 		JLabel lblPlainFile = new JLabel("Plaintext file:");
 		frmReefer.getContentPane().add(lblPlainFile, "cell 0 0,alignx trailing");
 		
