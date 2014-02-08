@@ -243,7 +243,7 @@ public class MainUI {
 					else debug = cipher.update(Arrays.copyOf(buffer, k));
 					
 					outStream.write(debug);
-					outStream.flush();
+					//outStream.flush();
 					if(percent != (percent = (int) (((float) block++)/(cipherFile.length()/IV.length)*100)) && percent % 2 == 0){
 						process(percent);
 						//System.out.println(percent);
@@ -386,7 +386,7 @@ public class MainUI {
 		btnSelectFilePlain.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				int returnVal = fc.showOpenDialog(frmReefer);
+				int returnVal = fc.showSaveDialog(frmReefer);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 		            plainFile = fc.getSelectedFile();
 		            txtPlainFileLocation.setText(plainFile.getAbsolutePath());
