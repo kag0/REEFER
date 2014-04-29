@@ -34,6 +34,10 @@ import java.util.Arrays;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
+import lambdaCrypto.Algorithms;
+import lambdaCrypto.Crypto;
+import lambdaCrypto.Modes;
+
 public class MainUI {
 
 	private JFrame frmReefer;
@@ -130,22 +134,24 @@ public class MainUI {
 				FileOutputStream fos = new FileOutputStream(cipherFile);
 				BufferedOutputStream outStream = new BufferedOutputStream(fos);
 				//create new cipher and IV
-				SHE cipher = new SHE();
-				byte[] IV = cipher.init(getHashedKey());
+				//SHE cipher = new SHE();
+				Crypto cipher = new Crypto(Crypto.OpMode.ENCRYPT);
+				byte[] IV = cipher.init(Algorithms.getSHECipher(), Modes.getOFB(),getHashedKey());
+				//byte[] IV = cipher.init(getHashedKey());
 				//System.out.println(Misc.bytesToHex(IV));
 				byte[] buffer = new byte[IV.length];
 				//write IV.length and IV to file
 				byte[] len = new byte[]{(byte) IV.length};
-				outStream.write(len);
-				outStream.write(IV);
+				fos.write(len);
+				fos.write(IV);
 				//buffer = first 32 bytes of reader
 				//while reader is not at EOF
 				int k;
 				int block = 0;
 				int percent = 0;
-				while((k = inStream.read(buffer)) != -1){//buffer = next 32 bytes of reader
+				while((k = fis.read(buffer)) != -1){//buffer = next 32 bytes of reader
 					//write cipher.update(buffer) to file
-					outStream.write(cipher.update(Arrays.copyOf(buffer, k)));
+					fos.write(cipher.update(Arrays.copyOf(buffer, k)));
 					if(percent != (percent = (int) (((float) block++)/(plainFile.length()/IV.length)*100)) && percent % 2 == 0){
 						process(percent);
 						//System.out.println(percent);
@@ -155,10 +161,10 @@ public class MainUI {
 				}
 				
 				//write cipher.doFinal(buffer) to file
-				outStream.write(cipher.doFinal());
-				inStream.close();
-				outStream.flush();
-				outStream.close();
+				fos.write(cipher.doFinal());
+				fis.close();
+				fos.flush();
+				fos.close();
 		    	return 0;
 		    }
 
@@ -218,31 +224,32 @@ public class MainUI {
 					throw new Exception("files not set up");
 				//create buffered reader and writer
 				FileInputStream fis = new FileInputStream(cipherFile);
-				BufferedInputStream inStream = new BufferedInputStream(fis);
+				//BufferedInputStream inStream = new BufferedInputStream(fis);
 				FileOutputStream fos = new FileOutputStream(plainFile);
-				BufferedOutputStream outStream = new BufferedOutputStream(fos);
+				//BufferedOutputStream outStream = new BufferedOutputStream(fos);
 
 				//create new cipher and IV
-				SHE cipher = new SHE();
-				
+				//SHE cipher = new SHE();
+				Crypto cipher = new Crypto(Crypto.OpMode.DECRYPT);
 				//read IV length and IV from file
-				int len = inStream.read();
+				int len = fis.read();
 				byte[] IV = new byte[len];
-				inStream.read(IV);
+				fis.read(IV);
 
-				cipher.init(IV, getHashedKey());
+				//cipher.init(IV, getHashedKey());
+				cipher.init(Algorithms.getSHECipher(), Modes.getOFB(),IV,getHashedKey());
 				byte[] buffer = new byte[IV.length];
 
 				int k;
 				int block = 0;
 				int percent = 0;
-				while((k = inStream.read(buffer)) != -1){//buffer = next 32 bytes of reader
+				while((k = fis.read(buffer)) != -1){//buffer = next 32 bytes of reader
 					byte[] debug;
 					if((block+1)*32 >= (cipherFile.length()-IV.length-1))
 						debug = cipher.doFinal(Arrays.copyOf(buffer, k));
 					else debug = cipher.update(Arrays.copyOf(buffer, k));
-					
-					outStream.write(debug);
+					System.out.println(Misc.bytesToHex(debug));
+					fos.write(debug);
 					//outStream.flush();
 					if(percent != (percent = (int) (((float) block++)/(cipherFile.length()/IV.length)*100)) && percent % 2 == 0){
 						process(percent);
@@ -255,8 +262,8 @@ public class MainUI {
 				//write cipher.doFinal(buffer) to file
 				//outStream.write(cipher.doFinal());
 				process(100);
-				inStream.close();
-				outStream.close();
+				fis.close();
+				fos.close();
 		    	return 0;
 		    }
 
